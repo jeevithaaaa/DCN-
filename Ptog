@@ -1,0 +1,678 @@
+1. Write a program for error detecting code using CRC-CCITT (16-bits) using JAVA
+
+import java.util.*; 
+public class crc 
+{
+	public static void main(String args[])
+	{ 
+		Scanner s=new Scanner(System.in);
+		int n;
+		System.out.println("Enter the size of the data:"); 
+		n=s.nextInt();
+		int data[]=new int[n]; 
+
+		System.out.println("Enter the data, bit by bit:"); 
+		for(int i=0; i < n; i++)
+		{
+			data[i]=s.nextInt();
+		}
+		System.out.println("Enter the size of the divisor:"); 
+		n=s.nextInt();
+		int divisor[]=new int[n]; 
+		System.out.println("Enter the divisor, bit by bit:"); 
+		for(int i=0; i < n; i++)
+		divisor[i]=s.nextInt();
+		int remainder[]=divide(data,divisor); 
+		System.out.println("\n The crc code generated is:"); 	
+		for(int i=0; i < data.length; i++)
+		System.out.print(data[i]); 
+		for(int i=0; i < remainder.length-1; i++)
+		System.out.print(remainder[i]); 
+		System.out.println();
+	int sent_data[]=new int[data.length+remainder.length-1]; 			  System.out.println("Enter the data to be sent:");
+		for(int i=0; i < sent_data.length; i++) 
+                        sent_data[i]=s.nextInt();
+		receive(sent_data,divisor);
+	}
+	static int[] divide(int old_data[],int divisor[])
+	{ 
+	   	int remainder[],i;
+		int data[]=new int[old_data.length+divisor.length]; 
+	System.arraycopy(old_data, 0,data, 0,old_data.length); 			  System.out.println("Message bits after appending divisor_length-1 0's:"); 
+		for(i=0; i<data.length-1; i++)
+		System.out.println(data[i]); 
+		remainder=new int[divisor.length]; 		
+		System.arraycopy(data, 0, remainder, 0, divisor.length); 
+		for(i=0; i < old_data.length; i++)
+		{
+			if(remainder[0]==1)
+			{
+				for(int j=1; j<divisor.length; j++)
+				{
+					remainder[j-1]=exor(remainder[j],divisor[j]);
+				}
+			}
+			else
+			{
+				for(int j=1; j < divisor.length; j++) 
+				remainder[j-1]=exor(remainder[j],0);
+			}
+			remainder[divisor.length-1]=data[i+divisor.length];
+		}
+		return remainder;
+	}
+	static int exor(int a, int b)	
+	{ 
+		if(a==b)
+		return 0;
+		return 1;
+	}
+	static void receive(int data[],int divisor[])	
+	{ 	
+		int remainder[]=divide(data, divisor); 
+		for(int i=0; i < remainder.length; i++)
+		{
+			if(remainder[i] != 0)
+			{
+				System.out.println("There is an error in received data");  
+				return;
+			}
+		}
+		System.out.println("Data was received without any error");
+
+	}
+}
+
+
+OUTPUT:
+
+student@student-H61M-S2-B3:~$ gedit crc.java &
+student@student-H61M-S2-B3:~$ javac crc.java
+student@student-H61M-S2-B3:~$ java crc
+enter the size of the data:
+7
+Enter the data, bit by bit:
+1 0 1 1 0 0 1
+Enter the size of the divisor:
+3
+Enter the divisor, bit by bit:
+1
+0
+1
+Message bits after appending divisor_length-1 	0's:
+1 0 1 1 0 0 1 0 0
+
+
+The crc code generated is:
+1 0 1 1 0 0 1 1 1
+Enter the data to be sent:
+1
+0
+1	
+1
+0
+0
+1
+1
+1
+Message bits after appending divisor_length-1 	0's:
+1 0 1 1 0 0 1 1 1 0 0
+Data was received without any error
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+2. Write a program for congestion control using a Leaky Bucket Algorithm using JAVA Program.
+
+import java.math.*; 
+import java.util.*; 
+import java.util.Random; 	
+import java.io.*;
+import java.lang.*; 
+public class leaky_bucket
+{
+     public static void main(String[]args)
+     {
+              int drop=0,mini,i,o_rate,b_size,nsec,p_remain=0; 
+	  int packet[]=new int[100];
+	  Scanner in=new Scanner(System.in); 
+	  System.out.print("Enter the bucket size:\n"); 
+	  b_size=in.nextInt(); 
+	  System.out.print("Enter output rate:\n"); 
+	  o_rate=in.nextInt();
+	  System.out.print("Enter the number of seconds to simulate:\n"); 		  
+              nsec=in.nextInt();
+	  Random rand=new Random(); 
+              for(i=0;i<nsec;i++)
+	  packet[i]=(rand.nextInt(1000));
+              System.out.println("seconds|packet received|packet sent| packets left|packets dropped\n"); 
+	  System.out.println("                   ");		
+	  for(i=0;i<nsec;i++)
+	  {
+	       p_remain+=packet[i]; 
+	       if(p_remain>b_size)
+	       {
+	            drop=p_remain-b_size; 
+                        p_remain=b_size; 
+		System.out.print(i+1         +"       "); 
+		System.out.print(packet[i] +"                ");
+	            mini=Math.min(p_remain,o_rate); 
+                    	System.out.print(mini +"	                 "); 
+p_remain=p_remain-mini; 
+                    	System.out.print(p_remain+"           "); 
+                    	System.out.println(drop +"	           "); 
+                    	System.out.print("	           \n"); 
+                       drop=0;
+	       }
+          }
+          while(p_remain!=0)
+          {
+ if(p_remain>b_size)
+	      	{
+	          		drop=p_remain-b_size;
+              	}
+	      	mini=Math.min(p_remain,o_rate); 
+              	System.out.print("              "+p_remain +"      	" +mini); 
+              	p_remain=p_remain-mini;
+              	System.out.println("            "+p_remain +"     	" +drop); 
+              	drop=0;
+          }
+     }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+OUTPUT:
+
+student@student-H61M-S2-B3:~/DCN_24-25$ gedit leaky_bucket.java
+student@student-H61M-S2-B3:~/DCN_24-25$ javac leaky_bucket.java
+student@student-H61M-S2-B3:~/DCN_24-25$ java leaky_bucket
+Enter the bucket size:
+10
+Enter output rate:
+4
+Enter the number of seconds to simulate:
+10
+seconds|packet received|packet sent| packets left|packets dropped
+                
+1       	      517                	4	            6           507	           
+	           
+2                103                	4	            6           99	           
+	           
+3       	      536                	4	            6           532	           
+	           
+4       	     139                	4	            6           135	           
+	           
+5       	     976                	4	            6           972	           
+	           
+6       	     811                	4	            6           807	           
+	           
+7       	     921                	4	            6           917	           
+	           
+8       	     827                	4	            6           823	           
+	           
+9       	     273                	4	            6           269	           
+	           
+10      	     625                	4	            6           621	           
+	           
+              6      	4            2     	0
+              2      	2            0     	0
+3. Write a Socket Programming in JAVA using TCP-Iterative Client-Server Program
+
+TCP Server program
+
+import java.net.*;
+import java.io.*;
+public class tcpser 
+{
+public static void main(String args[])throws Exception
+    	{
+         		ServerSocket sersock= new ServerSocket(4000);
+         		System.out.println("sever ready for connection");
+         		Socket sock=sersock.accept();
+         		System.out.println("connection is successful and waiting to serve");
+        		InputStream istream=sock.getInputStream();
+ 		BufferedReader fileRead=new BufferedReader(new InputStreamReader(istream));
+         		String fname=fileRead.readLine();
+      		BufferedReader contentRead=new BufferedReader(new FileReader(fname));
+         		OutputStream ostream=sock.getOutputStream();
+         		PrintWriter pwrite=new PrintWriter(ostream,true);
+        		String str;
+         while((str=contentRead.readLine())!=null)
+         {
+            pwrite.println(str);
+
+
+         }
+	
+    }
+}
+
+
+/*TCP Client program*/
+
+import java.net.*; 
+import java.io.*;
+
+public class tcpcl 
+{
+     public static void main(String args[])throws Exception
+     {
+          Socket sock=new Socket("127.0.0.1",4000); 
+	  System.out.println("enter the file name");
+          BufferedReader keyRead=new BufferedReader(new InputStreamReader(System.in)); 
+          String fname=keyRead.readLine();
+          OutputStream ostream=sock.getOutputStream(); 
+          PrintWriter pwrite=new PrintWriter(ostream,true); 
+          pwrite.println(fname);
+          InputStream istream=sock.getInputStream();
+          BufferedReader SocketRead=new BufferedReader(new InputStreamReader(istream)); 
+          String str;
+          while((str=SocketRead.readLine())!=null)
+         {
+             System.out.println(str); 
+	 }
+         pwrite.close(); 
+         SocketRead.close(); 
+         keyRead.close();    
+    }
+}
+
+
+ 
+
+
+
+
+
+
+
+
+
+
+
+2. Write a Socket Programming in 'JAVA' using UDP and Network Monitoring and Analysis with Wireshark.
+
+UDP Server program
+
+import java.io.*; 
+import java.net.*; 
+class udpser 
+{
+	public static void main(String args[]) throws Exception
+	{
+		DatagramSocket serversocket=new DatagramSocket(9876);
+		BufferedReader br=new BufferedReader(new InputStreamReader(System.in)); 
+		byte[] receiveData=new byte[1024];
+		byte[] sendData=new byte[1024];
+		DatagramPacket receivePacket=new DatagramPacket (receiveData,receiveData.length); 
+		serversocket.receive(receivePacket);
+String sentence=new String(receivePacket.getData());        System.out.println("RECEIVED:"+sentence); 
+                        InetAddress IPaddress=receivePacket.getAddress(); 
+		int port=receivePacket.getPort(); 
+		System.out.println("enter the message");
+		String data=br.readLine(); 
+		sendData=data.getBytes();
+DatagramPacket sendPacket=new  DatagramPacket(sendData,sendData.length,IPaddress,port); 
+		serversocket.send(sendPacket);
+		serversocket.close();
+
+	}
+
+}
+
+UDP Client  program
+
+
+import java.io.*; 
+import java.net.*; 
+class udpcl
+{
+	public static void main(String[]args)throws Exception
+    	{
+       		BufferedReader in=new BufferedReader(new InputStreamReader(System.in)); 
+       		DatagramSocket clientsocket=new DatagramSocket();
+		InetAddress IPaddress=InetAddress.getByName("localhost");
+        		byte[] sendData=new byte[1024];
+		byte[] receiveData=new byte[1024];
+        		String sentence="hello server"; 		
+        		sendData=sentence.getBytes();
+               DatagramPacket sendPacket=new DatagramPacket (sendData,sendData.length,IPaddress,9876); 
+        		clientsocket.send(sendPacket);
+	DatagramPacket receivePacket=new DatagramPacket(receiveData,receiveData.length); 
+
+
+TCP Client  program
+
+import java.net.*; 
+import java.io.*;
+
+public class tcpcl 
+{
+     public static void main(String args[])throws Exception
+     {
+          Socket sock=new Socket("127.0.0.1",4000); 
+          System.out.println("enter the file name");
+          BufferedReader keyRead=new BufferedReader(new InputStreamReader(System.in)); 
+          String fname=keyRead.readLine();
+          OutputStream ostream=sock.getOutputStream(); 
+          PrintWriter pwrite=new PrintWriter(ostream,true); 
+          pwrite.println(fname);
+          InputStream istream=sock.getInputStream();
+          BufferedReader SocketRead=new BufferedReader(new InputStreamReader(istream)); 
+          String str;
+          while((str=SocketRead.readLine())!=null)
+         {
+             System.out.println(str); 
+         }
+         pwrite.close(); 
+         SocketRead.close(); 
+         keyRead.close();    
+    }
+}
+
+
+ 	clientsocket.receive(receivePacket);
+	String modifiedsentence=new String(receivePacket.getData()); 	   		System.out.println("FROM SERVER:" +modifiedsentence); 
+	clientsocket.close();
+    }
+}
+
+
+
+
+OUTPUT:
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+3. Write a Socket Programming in JAVA using TCP-Iterative Client-Server Programs */
+
+TCP Server program
+
+import java.net.*;
+import java.io.*;
+public class tcpser 
+{
+    public static void main(String args[])throws Exception
+    {
+         ServerSocket sersock= new ServerSocket(4000);
+         System.out.println("sever ready for connection");
+         Socket sock=sersock.accept();
+         System.out.println("connection is successfull and waiting to serve");
+         InputStream istream=sock.getInputStream();
+ BufferedReader fileRead=new BufferedReader(new InputStreamReader(istream));
+         String fname=fileRead.readLine();
+      BufferedReader contentRead=new BufferedReader(new FileReader(fname));
+         OutputStream ostream=sock.getOutputStream();
+         PrintWriter pwrite=new PrintWriter(ostream,true);
+         String str;
+         while((str=contentRead.readLine())!=null)
+         {
+            pwrite.println(str);
+
+
+         }
+	
+    }
+}
+
+
+/*TCP Client program*/
+
+import java.net.*; 
+import java.io.*;
+
+public class tcpcl 
+{
+     public static void main(String args[])throws Exception
+     {
+          Socket sock=new Socket("127.0.0.1",4000); 
+	  System.out.println("enter the file name");
+          BufferedReader keyRead=new BufferedReader(new InputStreamReader(System.in)); 
+          String fname=keyRead.readLine();
+          OutputStream ostream=sock.getOutputStream(); 
+          PrintWriter pwrite=new PrintWriter(ostream,true); 
+          pwrite.println(fname);
+          InputStream istream=sock.getInputStream();
+          BufferedReader SocketRead=new BufferedReader(new InputStreamReader(istream)); 
+          String str;
+          while((str=SocketRead.readLine())!=null)
+         {
+             System.out.println(str); 
+	 }
+         pwrite.close(); 
+         SocketRead.close(); 
+         keyRead.close();    
+    }
+}
+
+
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+8. Write a program for error detecting code using CRC-CCITT(16-bits)using JAVA
+
+import java.util.*; 
+public class crc 
+{
+	public static void main(String args[])
+	{ 
+		Scanner s=new Scanner(System.in);
+		int n;
+		System.out.println("enter the size of the data:"); 
+		n=s.nextInt();
+		int data[]=new int[n]; 
+
+		System.out.println("enter the data ,bit by bit:"); 
+		for(int i=0; i < n; i++)
+		{
+			data[i]=s.nextInt();
+		}
+		System.out.println("enter ther size of the divisor:"); 
+		n=s.nextInt();
+		int divisor[]=new int[n]; 
+		System.out.println("enter the divisor,bit by bit:"); 
+		for(int i=0; i < n; i++)
+		divisor[i]=s.nextInt();
+		int remainder[]=divide(data,divisor); 
+		System.out.println("\n the crc code generated is:"); 	
+		for(int i=0; i < data.length; i++)
+		System.out.print(data[i]); 
+		for(int i=0; i < remainder.length-1; i++)
+		System.out.print(remainder[i]); 
+		System.out.println();
+		int sent_data[]=new int[data.length+remainder.length-1]; 			System.out.println("enter the data to be sent:");
+		for(int i=0; i < sent_data.length; i++) sent_data[i]=s.nextInt();
+		recieve(sent_data,divisor);
+	}
+	static int[] divide(int old_data[],int divisor[])
+	{ 
+	   	int remainder[],i;
+		int data[]=new int[old_data.length+divisor.length]; 
+		System.arraycopy(old_data, 0,data, 0,old_data.length); 			System.out.println("message bits after appending divisor_length-1 			0's:"); 
+		for(i=0; i<data.length-1; i++)
+		System.out.println(data[i]); 
+		remainder=new int[divisor.length]; 		
+		System.arraycopy(data, 0, remainder, 0, divisor.length); 
+		for(i=0; i < old_data.length; i++)
+		{
+			if(remainder[0]==1)
+			{
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
